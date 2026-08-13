@@ -2,3 +2,15 @@
 /segmented/
 /validation/
 /model/
+
+# Arquivos locais e artefatos gerados
+__pycache__/
+*.py[cod]
+.cache/
+.venv/
+.uv-cache/
+data/
+models/
+outputs/
+*.pt
+*.pth

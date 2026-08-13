@@ -1,77 +1,71 @@
-<div align="center">
-
-![Logo](https://via.placeholder.com/150x150)
-
 # Desafio Bem Agro
 
+Pipeline de segmentação de vegetação em ortomosaicos com uma U-Net e encoder ResNet-50.
 
+## Requisitos
 
-[Overview](#overview)
-•
-[Screenshot](#screenshot)
-•
-[Demo](#demo)
-•
-[Documentation](#documentation)
+Instale as dependências listadas em `requirements.txt`. O treinamento pode ser executado em CPU, mas uma GPU compatível com CUDA é recomendada.
 
-</div>
+## Organização dos dados
 
-## 📑 Menu
+As imagens RGB e suas máscaras devem ficar em diretórios separados e usar o mesmo nome-base:
 
-- [Overview](#overview)
-- [Documentation](#documentation)
-- [Requirements](#requirements)
-- [Installation and usage](#installation)
-  - [Dependencies and libs](#dependencies)
-- [License](#license)
-- [Author](#author)
+```text
+dataset/
+├── images/
+│   ├── bloco_0_0.png
+│   └── bloco_0_1.png
+└── masks/
+    ├── bloco_0_0.png
+    └── bloco_0_1.png
+```
 
-<a id="overview"></a>
+As máscaras devem ser binárias, com valores `0/1` ou `0/255`. Para a validação espacial, os arquivos devem seguir o formato `bloco_X_Y`.
 
-## 📝 Overview
+## Treinamento
 
-Desafio consiste em toda pipeline de treino de um modelo de ortomosaico
+```bash
+python train_model.py \
+  --rgb dataset/images \
+  --groundtruth dataset/masks \
+  --modelpath model/unet_resnet50.pth \
+  --epochs 60 \
+  --batch-size 2 \
+  --device auto
+```
 
-<a id="screenshot"></a>
+O treinamento salva o melhor checkpoint segundo o mIoU de validação. O arquivo inclui a versão da arquitetura, pesos, normalização, métricas e limiar calibrado para inferência.
 
-##  Screenshot
+## Inferência
 
-![Logo](https://via.placeholder.com/750x500)
+Para processar uma imagem ou todas as imagens de um diretório:
 
+```bash
+python model_inference.py \
+  --rgb dataset/images \
+  --modelpath model/unet_resnet50.pth \
+  --output segmented \
+  --device auto
+```
 
+O limiar salvo no checkpoint é usado automaticamente. Para substituí-lo:
 
-<a id="documentation"></a>
+```bash
+python model_inference.py \
+  --rgb dataset/images/bloco_0_0.png \
+  --modelpath model/unet_resnet50.pth \
+  --output segmented/bloco_0_0.png \
+  --threshold 0.70
+```
 
-## 📚 Documentation
+> A arquitetura usa um novo decoder com skip connections. Checkpoints antigos, contendo apenas o `state_dict`, não são compatíveis e precisam ser treinados novamente.
 
+## Testes
 
+```bash
+python -m unittest discover -s tests -v
+```
 
-<a id="requirements"></a>
-
-## ❗ Requirements
-Verificar o arquivo requirements.txt
-
-<a id="installation"></a>
-
-## 💾 Installation and usage
-
-
-<a id="dependencies"></a>
-
-### ✅ Dependencies and libs
-
-
-
-<a id="license"></a>
-
-## 🥇 License
-
-The [MIT License]() (MIT)
-
-<a id="author"></a>
-
-##  👨‍💻 Author
+## Autor
 
 - [Joao Victor Rocha](https://github.com/joaomedeirosr)
-
-Made with &nbsp;❤️&nbsp;
